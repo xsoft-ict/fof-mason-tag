@@ -14,18 +14,6 @@ export default function () {
     let dTag = '';
     var tagChanged = '';
 
-    extend(TagDiscussionModal.prototype, 'onsubmit', function (e) {
-        // get name of the tag selected in the modal
-
-        if (this.selected == false) {
-            // if no tag is selected, empty the header
-            dTag = '';
-            return;
-        }
-
-        dTag = this.selected[0].data.attributes.name;
-    });
-
     extend(Composer.prototype, 'hide', function (e) {
         // remove the the fields from the headerItems...
         dTag = '';
@@ -38,13 +26,24 @@ export default function () {
 
         // so this list contains whether a tag has fields!
         const matchingTags = ByTagsUnit.matchTags();
-
         if (byTagEnabled) {
+            dTag = '';
             this.myFields = [];
 
-            for (let i = 0; i < matchingTags.length; i++) {
-                if (matchingTags[i].tagName == dTag) {
-                    this.myFields = matchingTags[i].fields;
+            if (app.composer.fields.tags && app.composer.fields.tags.length > 0) {
+                for (let selectedTagIndex = 0; selectedTagIndex < app.composer.fields.tags.length; selectedTagIndex++) {
+                    let selectTagName = app.composer.fields.tags[selectedTagIndex].data.attributes.name;
+                    for (let i = 0; i < matchingTags.length; i++) {
+                        if (matchingTags[i].tagName == selectTagName) {
+                            this.myFields = matchingTags[i].fields;
+                            dTag = selectTagName;
+                            break;
+                        }
+                    }
+                    if (dTag != '') {
+                        // Found valid selected tag
+                        break;
+                    }
                 }
             }
             // this.myFields is a list of fields that match the selected tag only
